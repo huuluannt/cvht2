@@ -1,0 +1,37 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: CV
+      - generic [ref=e7]:
+        - strong [ref=e8]: CVHT2
+        - generic [ref=e9]: Academic advisor chatbot
+    - link "Admin login" [ref=e10] [cursor=pointer]:
+      - /url: /api/auth/google/start
+  - generic [ref=e11]:
+    - generic [ref=e12]: Thêm API key Gemini hoặc Groq để bắt đầu chat. Key chỉ lưu trong trình duyệt.
+    - region "CVHT Chatbot" [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - img [ref=e17]
+          - generic [ref=e20]:
+            - heading "CVHT Chatbot" [level=1] [ref=e21]
+            - paragraph [ref=e22]: Khoa Sinh học - CNSH, Trường ĐH KHTN, ĐHQG-HCM
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]: Provider
+            - combobox "Provider" [ref=e26]:
+              - option "Gemini" [selected]
+              - option "Groq"
+          - button "Add API Key" [ref=e27] [cursor=pointer]:
+            - img [ref=e28]
+            - text: Add API Key
+          - button "How to get API key?" [ref=e31] [cursor=pointer]:
+            - img [ref=e32]
+            - text: How to get API key?
+      - article [ref=e36]:
+        - generic [ref=e37]: Xin chào, tôi là chatbot CVHT. Bạn có thắc mắc gì không?
+      - generic [ref=e38]:
+        - textbox "Nhập câu hỏi" [ref=e39]:
+          - /placeholder: Nhập câu hỏi về học vụ, chương trình, quy định...
+        - button "Gửi câu hỏi" [ref=e40] [cursor=pointer]:
+          - img [ref=e41]

@@ -1,0 +1,67 @@
+- generic [ref=e2]:
+  - main [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: CV
+        - generic [ref=e7]:
+          - strong [ref=e8]: CVHT2
+          - generic [ref=e9]: Academic advisor chatbot
+      - link "Admin login" [ref=e10] [cursor=pointer]:
+        - /url: /api/auth/google/start
+    - region "CVHT Chatbot" [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - img [ref=e17]
+          - generic [ref=e20]:
+            - heading "CVHT Chatbot" [level=1] [ref=e21]
+            - paragraph [ref=e22]: Khoa Sinh học - CNSH, Trường ĐH KHTN, ĐHQG-HCM
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]: Provider
+            - combobox "Provider" [ref=e26]:
+              - option "Gemini" [selected]
+              - option "Groq"
+          - button "Add API Key" [ref=e27] [cursor=pointer]:
+            - img [ref=e28]
+            - text: Add API Key
+          - button "How to get API key?" [active] [ref=e31] [cursor=pointer]:
+            - img [ref=e32]
+            - text: How to get API key?
+      - article [ref=e36]:
+        - generic [ref=e37]: Xin chào, tôi là chatbot CVHT. Bạn có thắc mắc gì không?
+      - generic [ref=e38]:
+        - textbox "Nhập câu hỏi" [ref=e39]:
+          - /placeholder: Nhập câu hỏi về học vụ, chương trình, quy định...
+        - button "Gửi câu hỏi" [ref=e40] [cursor=pointer]:
+          - img [ref=e41]
+  - dialog "How to get API key?" [ref=e71]:
+    - generic [ref=e72]:
+      - generic [ref=e73]:
+        - heading "How to get API key?" [level=2] [ref=e74]
+        - paragraph [ref=e75]: Chọn Gemini hoặc Groq, rồi lưu khóa vào trình duyệt của bạn.
+      - button "Đóng" [ref=e76] [cursor=pointer]:
+        - img [ref=e77]
+    - generic [ref=e80]:
+      - generic [ref=e81]:
+        - heading "Gemini API key" [level=3] [ref=e82]
+        - list [ref=e83]:
+          - listitem [ref=e84]: Mở Google AI Studio.
+          - listitem [ref=e85]: Đăng nhập bằng tài khoản Google.
+          - listitem [ref=e86]: Vào mục API keys và tạo khóa mới.
+          - listitem [ref=e87]: Dán khóa vào nút Add API Key trong CVHT2.
+        - link "Google AI Studio" [ref=e88] [cursor=pointer]:
+          - /url: https://aistudio.google.com/app/apikey
+          - text: Google AI Studio
+          - img [ref=e89]
+      - generic [ref=e93]:
+        - heading "Groq API key" [level=3] [ref=e94]
+        - list [ref=e95]:
+          - listitem [ref=e96]: Mở Groq Console.
+          - listitem [ref=e97]: Đăng nhập hoặc tạo tài khoản Groq.
+          - listitem [ref=e98]: Vào API Keys và tạo khóa mới.
+          - listitem [ref=e99]: Dán khóa vào nút Add API Key trong CVHT2.
+        - link "Groq Console" [ref=e100] [cursor=pointer]:
+          - /url: https://console.groq.com/keys
+          - text: Groq Console
+          - img [ref=e101]
+    - generic [ref=e105]: Free tiers thường có rate limit và quota hằng ngày. Không chia sẻ API key, không gửi key cho người khác, và xóa key khỏi trình duyệt nếu dùng máy chung.

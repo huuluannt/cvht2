@@ -1,4 +1,4 @@
-import { Bot, HelpCircle, KeyRound, Loader2, Send, ShieldCheck } from "lucide-react";
+import { Bot, HelpCircle, KeyRound, Loader2, PanelLeftOpen, Send, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { askCvht } from "../lib/api";
@@ -10,6 +10,7 @@ const MAX_QUESTION_LENGTH = 1200;
 type ChatWindowProps = {
   apiKey: string;
   isAdmin: boolean;
+  onOpenAdminPanel?: () => void;
   provider: Provider;
   onOpenGuide: () => void;
   onOpenKeyModal: () => void;
@@ -27,6 +28,7 @@ function createMessage(role: ChatMessage["role"], content: string): ChatMessage 
 export function ChatWindow({
   apiKey,
   isAdmin,
+  onOpenAdminPanel,
   provider,
   onOpenGuide,
   onOpenKeyModal,
@@ -103,6 +105,17 @@ export function ChatWindow({
         </div>
 
         <div className="chat-tools">
+          {isAdmin && onOpenAdminPanel && (
+            <button
+              aria-label="Mở admin"
+              className="icon-button mobile-admin-button"
+              title="Mở admin"
+              type="button"
+              onClick={onOpenAdminPanel}
+            >
+              <PanelLeftOpen size={18} />
+            </button>
+          )}
           <label className="provider-select">
             <span>Provider</span>
             <select value={provider} onChange={(event) => onProviderChange(event.target.value as Provider)}>

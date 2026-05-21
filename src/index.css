@@ -93,7 +93,8 @@ a {
 .file-row-main,
 .modal-actions,
 .chat-tools,
-.server-key-pill {
+.server-key-pill,
+.admin-header-actions {
   align-items: center;
   display: flex;
 }
@@ -220,6 +221,11 @@ a {
 .icon-button.danger:hover {
   border-color: #ffb4a8;
   color: var(--danger);
+}
+
+.mobile-admin-button,
+.mobile-admin-close {
+  display: none;
 }
 
 .auth-notice,
@@ -473,6 +479,11 @@ select {
   display: flex;
   gap: 12px;
   justify-content: space-between;
+}
+
+.admin-header-actions {
+  flex: 0 0 auto;
+  gap: 8px;
 }
 
 .admin-header h2 {
@@ -750,6 +761,48 @@ select {
 }
 
 @media (max-width: 900px) {
+  .admin-layout {
+    display: block;
+    position: relative;
+  }
+
+  .admin-panel {
+    border: 0;
+    display: none;
+    height: 100%;
+    width: 100%;
+  }
+
+  .admin-layout.mobile-admin-open .admin-panel {
+    display: block;
+  }
+
+  .admin-layout.mobile-admin-open .admin-chat-pane {
+    display: none;
+  }
+
+  .admin-chat-pane {
+    height: 100%;
+    padding: 0;
+  }
+
+  .admin-chat-pane .chat-shell {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    height: 100svh;
+  }
+
+  .admin-panel-inner {
+    height: 100svh;
+    padding: 16px;
+  }
+
+  .mobile-admin-button,
+  .mobile-admin-close {
+    display: inline-flex;
+  }
+
   .chat-header {
     align-items: stretch;
     flex-direction: column;
@@ -777,18 +830,7 @@ select {
     display: none;
   }
 
-  .admin-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(220px, 42svh) minmax(0, 1fr);
-  }
-
-  .admin-panel {
-    border-bottom: 1px solid var(--border);
-    border-right: 0;
-  }
-
-  .admin-panel-inner,
-  .admin-chat-pane {
+  .admin-panel-inner {
     padding: 12px;
   }
 

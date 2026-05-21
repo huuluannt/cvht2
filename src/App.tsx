@@ -60,6 +60,7 @@ function App() {
   const [provider, setProvider] = useState<Provider>(readStoredProvider);
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isMobileAdminOpen, setIsMobileAdminOpen] = useState(false);
   const [authNotice, setAuthNotice] = useState(authMessageFromUrl);
 
   const hasApiKey = useMemo(() => apiKey.trim().length > 0, [apiKey]);
@@ -109,6 +110,7 @@ function App() {
   async function handleLogout() {
     await logoutAdmin();
     setAuth({ email: null, isAdmin: false });
+    setIsMobileAdminOpen(false);
   }
 
   function handleAdminLogin() {
@@ -136,6 +138,7 @@ function App() {
       void getAuthState()
         .then((nextAuth) => {
           setAuth(nextAuth);
+          setIsMobileAdminOpen(false);
           setAuthNotice(
             nextAuth.isAdmin ? "" : "Cửa sổ đăng nhập đã đóng trước khi hoàn tất.",
           );
@@ -152,6 +155,7 @@ function App() {
     <ChatWindow
       apiKey={apiKey}
       isAdmin={auth.isAdmin}
+      onOpenAdminPanel={() => setIsMobileAdminOpen(true)}
       provider={provider}
       onOpenGuide={() => setIsGuideOpen(true)}
       onOpenKeyModal={() => setIsKeyModalOpen(true)}
@@ -162,8 +166,12 @@ function App() {
   return (
     <>
       {auth.isAdmin ? (
-        <main className="admin-layout">
-          <AdminPanel email={auth.email} onLogout={handleLogout} />
+        <main className={`admin-layout${isMobileAdminOpen ? " mobile-admin-open" : ""}`}>
+          <AdminPanel
+            email={auth.email}
+            onCloseMobile={() => setIsMobileAdminOpen(false)}
+            onLogout={handleLogout}
+          />
           <section className="admin-chat-pane">{chat}</section>
         </main>
       ) : (

@@ -1,4 +1,4 @@
-import { FileText, RefreshCw, Trash2, Upload } from "lucide-react";
+import { FileText, RefreshCw, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import {
@@ -37,10 +37,11 @@ function formatDate(value: string): string {
 
 type AdminPanelProps = {
   email: string | null;
+  onCloseMobile?: () => void;
   onLogout: () => void;
 };
 
-export function AdminPanel({ email, onLogout }: AdminPanelProps) {
+export function AdminPanel({ email, onCloseMobile, onLogout }: AdminPanelProps) {
   const [files, setFiles] = useState<PublicDocument[]>([]);
   const [isBusy, setIsBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -140,9 +141,22 @@ export function AdminPanel({ email, onLogout }: AdminPanelProps) {
             <h2>Admin</h2>
             <p>{email}</p>
           </div>
-          <button className="ghost-button" type="button" onClick={onLogout}>
-            Logout
-          </button>
+          <div className="admin-header-actions">
+            <button className="ghost-button" type="button" onClick={onLogout}>
+              Logout
+            </button>
+            {onCloseMobile && (
+              <button
+                aria-label="Đóng admin"
+                className="icon-button mobile-admin-close"
+                title="Đóng admin"
+                type="button"
+                onClick={onCloseMobile}
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
         </header>
 
         <section className="upload-box">

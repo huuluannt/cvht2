@@ -3,15 +3,15 @@ import {
   buildGoogleAuthUrl,
   createOAuthStateCookie,
   OAUTH_STATE_COOKIE,
-} from "../../_lib/auth";
+} from "../../_lib/auth.js";
 import {
   checkRateLimit,
   clearCookie,
   redirect,
   sendJson,
   sendMethodNotAllowed,
-} from "../../_lib/http";
-import type { ApiRequest, ApiResponse } from "../../_lib/types";
+} from "../../_lib/http.js";
+import type { ApiRequest, ApiResponse } from "../../_lib/types.js";
 
 export default function handler(req: ApiRequest, res: ApiResponse): void {
   if (req.method !== "GET") {

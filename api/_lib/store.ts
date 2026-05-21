@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { copyFile, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
-import { splitTextIntoChunks } from "./chunking";
-import { extractTextFromFile } from "./extract";
-import type { DocumentMeta, PublicDocumentMeta, RagChunk, StoreShape } from "./types";
+import { splitTextIntoChunks } from "./chunking.js";
+import { extractTextFromFile } from "./extract.js";
+import type { DocumentMeta, PublicDocumentMeta, RagChunk, StoreShape } from "./types.js";
 
 const DATA_DIR =
   process.env.CVHT_DATA_DIR ||

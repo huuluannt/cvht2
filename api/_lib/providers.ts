@@ -1,5 +1,5 @@
-import { FALLBACK_ANSWER, SYSTEM_INSTRUCTION, getProviderModel } from "./env";
-import type { Provider, RetrievedChunk } from "./types";
+import { FALLBACK_ANSWER, SYSTEM_INSTRUCTION, getProviderModel } from "./env.js";
+import type { Provider, RetrievedChunk } from "./types.js";
 
 export class ProviderError extends Error {
   kind: "invalid_key" | "quota_exceeded" | "provider_error";
@@ -166,4 +166,3 @@ export async function answerWithProvider(
 
   return appendSources(rawAnswer, chunks);
 }
-

@@ -1,4 +1,4 @@
-import type { RagChunk } from "./types";
+import type { RagChunk } from "./types.js";
 
 const TARGET_CHUNK_TOKENS = 800;
 const MIN_CHUNK_TOKENS = 500;
@@ -58,4 +58,3 @@ export function splitTextIntoChunks(
 
   return chunks;
 }
-

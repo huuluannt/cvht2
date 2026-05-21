@@ -1,4 +1,4 @@
-import type { Provider } from "./types";
+import type { Provider } from "./types.js";
 
 export const FALLBACK_ANSWER =
   "Tôi không tìm thấy thông tin này trong dữ liệu CVHT hiện có.";
@@ -41,4 +41,3 @@ export function getRequiredEnv(name: string): string {
 
   return value;
 }
-

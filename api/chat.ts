@@ -4,13 +4,13 @@ import {
   MAX_QUESTION_LENGTH,
   getServerApiKey,
   isProvider,
-} from "./_lib/env";
-import { readSession } from "./_lib/auth";
-import { checkRateLimit, readJsonBody, sendJson, sendMethodNotAllowed } from "./_lib/http";
-import { answerWithProvider, ProviderError } from "./_lib/providers";
-import { retrieveRelevantChunks } from "./_lib/retrieval";
-import { getAllChunks } from "./_lib/store";
-import type { ApiRequest, ApiResponse, Provider } from "./_lib/types";
+} from "./_lib/env.js";
+import { readSession } from "./_lib/auth.js";
+import { checkRateLimit, readJsonBody, sendJson, sendMethodNotAllowed } from "./_lib/http.js";
+import { answerWithProvider, ProviderError } from "./_lib/providers.js";
+import { retrieveRelevantChunks } from "./_lib/retrieval.js";
+import { getAllChunks } from "./_lib/store.js";
+import type { ApiRequest, ApiResponse, Provider } from "./_lib/types.js";
 
 type ChatBody = {
   provider?: Provider;
@@ -130,4 +130,3 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
     });
   }
 }
-

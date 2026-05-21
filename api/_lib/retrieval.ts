@@ -1,4 +1,4 @@
-import type { RagChunk, RetrievedChunk } from "./types";
+import type { RagChunk, RetrievedChunk } from "./types.js";
 
 const STOP_WORDS = new Set([
   "a",
@@ -122,4 +122,3 @@ export function retrieveRelevantChunks(
     })
     .slice(0, topK);
 }
-

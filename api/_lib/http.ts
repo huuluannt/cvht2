@@ -1,5 +1,5 @@
 import { parse, serialize } from "cookie";
-import type { ApiRequest, ApiResponse } from "./types";
+import type { ApiRequest, ApiResponse } from "./types.js";
 
 type JsonValue = Record<string, unknown> | unknown[];
 

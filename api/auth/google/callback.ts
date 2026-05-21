@@ -5,9 +5,9 @@ import {
   exchangeGoogleCode,
   isAllowedAdminEmail,
   validateOAuthState,
-} from "../../_lib/auth";
-import { clearCookie, getRequestUrl, redirect, sendMethodNotAllowed } from "../../_lib/http";
-import type { ApiRequest, ApiResponse } from "../../_lib/types";
+} from "../../_lib/auth.js";
+import { clearCookie, getRequestUrl, redirect, sendMethodNotAllowed } from "../../_lib/http.js";
+import type { ApiRequest, ApiResponse } from "../../_lib/types.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   if (req.method !== "GET") {
@@ -45,4 +45,3 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
     redirect(res, authErrorRedirect("google_oauth_failed"));
   }
 }
-

@@ -1,7 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { getAdminEmails, getRequiredEnv } from "./env";
-import { clearCookie, createCookie, getCookies, sendJson } from "./http";
-import type { ApiRequest, ApiResponse } from "./types";
+import { getAdminEmails, getRequiredEnv } from "./env.js";
+import { clearCookie, createCookie, getCookies, sendJson } from "./http.js";
+import type { ApiRequest, ApiResponse } from "./types.js";
 
 export const SESSION_COOKIE = "cvht_session";
 export const OAUTH_STATE_COOKIE = "cvht_oauth_state";

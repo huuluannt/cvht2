@@ -1,6 +1,6 @@
-import { clearAuthCookies } from "../_lib/auth";
-import { sendJson, sendMethodNotAllowed } from "../_lib/http";
-import type { ApiRequest, ApiResponse } from "../_lib/types";
+import { clearAuthCookies } from "../_lib/auth.js";
+import { sendJson, sendMethodNotAllowed } from "../_lib/http.js";
+import type { ApiRequest, ApiResponse } from "../_lib/types.js";
 
 export default function handler(req: ApiRequest, res: ApiResponse): void {
   if (req.method !== "POST") {
@@ -11,4 +11,3 @@ export default function handler(req: ApiRequest, res: ApiResponse): void {
   res.setHeader("set-cookie", clearAuthCookies());
   sendJson(res, 200, { ok: true });
 }
-

@@ -1,15 +1,15 @@
 import formidable from "formidable";
-import { isSupportedFile, supportedFileTypesLabel } from "../_lib/extract";
-import { checkRateLimit, getRequestUrl, sendJson, sendMethodNotAllowed } from "../_lib/http";
-import { requireAdmin } from "../_lib/auth";
+import { isSupportedFile, supportedFileTypesLabel } from "../_lib/extract.js";
+import { checkRateLimit, getRequestUrl, sendJson, sendMethodNotAllowed } from "../_lib/http.js";
+import { requireAdmin } from "../_lib/auth.js";
 import {
   createDocumentFromTempFile,
   deleteDocument,
   listDocuments,
   reindexDocument,
   toPublicDocument,
-} from "../_lib/store";
-import type { ApiRequest, ApiResponse } from "../_lib/types";
+} from "../_lib/store.js";
+import type { ApiRequest, ApiResponse } from "../_lib/types.js";
 
 const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
 

@@ -166,14 +166,14 @@ export function checkRateLimit(
   scope: string,
   limit: number,
   windowMs: number,
-): { ok: true } | { ok: false; retryAfterSeconds: number } {
+): { ok: boolean; retryAfterSeconds: number } {
   const key = `${scope}:${getClientIp(req)}`;
   const now = Date.now();
   const current = rateLimitStore.get(key);
 
   if (!current || current.resetAt <= now) {
     rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
-    return { ok: true };
+    return { ok: true, retryAfterSeconds: 0 };
   }
 
   if (current.count >= limit) {
@@ -184,5 +184,5 @@ export function checkRateLimit(
   }
 
   current.count += 1;
-  return { ok: true };
+  return { ok: true, retryAfterSeconds: 0 };
 }

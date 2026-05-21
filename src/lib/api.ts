@@ -19,7 +19,19 @@ async function parseResponse<T>(response: Response): Promise<T> {
   const data = (await response.json().catch(() => ({}))) as T & { message?: string };
 
   if (!response.ok) {
-    throw new Error(data.message || "Yêu cầu thất bại.");
+    if (data.message) {
+      throw new Error(data.message);
+    }
+
+    if (response.status === 413) {
+      throw new Error("File quá lớn. Vui lòng chọn file dưới 4 MB.");
+    }
+
+    if (response.status >= 500) {
+      throw new Error("Serverless function bị lỗi. Vui lòng xem Vercel Logs để biết chi tiết.");
+    }
+
+    throw new Error("Yêu cầu thất bại.");
   }
 
   return data;

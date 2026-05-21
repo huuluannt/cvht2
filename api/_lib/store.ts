@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { copyFile, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { splitTextIntoChunks } from "./chunking.js";
 import { extractTextFromFile } from "./extract.js";
@@ -67,8 +67,8 @@ export async function getAllChunks(): Promise<RagChunk[]> {
   return store.chunks;
 }
 
-export async function createDocumentFromTempFile(
-  tempPath: string,
+export async function createDocumentFromBuffer(
+  buffer: Buffer,
   originalName: string,
   fileSize: number,
 ): Promise<DocumentMeta> {
@@ -78,7 +78,7 @@ export async function createDocumentFromTempFile(
   const fileName = safeFileName(originalName);
   const storedPath = join(UPLOAD_DIR, `${id}${extension}`);
 
-  await copyFile(tempPath, storedPath);
+  await writeFile(storedPath, buffer);
 
   const document: DocumentMeta = {
     id,

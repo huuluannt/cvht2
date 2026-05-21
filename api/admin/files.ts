@@ -1,9 +1,9 @@
-import formidable from "formidable";
 import { isSupportedFile, supportedFileTypesLabel } from "../_lib/extract.js";
 import { checkRateLimit, getRequestUrl, sendJson, sendMethodNotAllowed } from "../_lib/http.js";
+import { parseMultipartFiles } from "../_lib/multipart.js";
 import { requireAdmin } from "../_lib/auth.js";
 import {
-  createDocumentFromTempFile,
+  createDocumentFromBuffer,
   deleteDocument,
   listDocuments,
   reindexDocument,
@@ -11,34 +11,10 @@ import {
 } from "../_lib/store.js";
 import type { ApiRequest, ApiResponse } from "../_lib/types.js";
 
-const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
-
-type FormidableFile = {
-  filepath: string;
-  originalFilename?: string | null;
-  size: number;
-};
-
-function flattenFiles(files: formidable.Files<string>): FormidableFile[] {
-  return Object.values(files)
-    .flat()
-    .filter(Boolean)
-    .map((file) => file as FormidableFile);
-}
-
-async function parseUpload(req: ApiRequest): Promise<FormidableFile[]> {
-  const form = formidable({
-    multiples: true,
-    maxFileSize: MAX_UPLOAD_SIZE,
-    keepExtensions: true,
-  });
-
-  const [, files] = await form.parse(req);
-  return flattenFiles(files);
-}
+const MAX_UPLOAD_SIZE = 4 * 1024 * 1024;
 
 async function handleUpload(req: ApiRequest, res: ApiResponse): Promise<void> {
-  const files = await parseUpload(req);
+  const files = await parseMultipartFiles(req, MAX_UPLOAD_SIZE);
 
   if (files.length === 0) {
     sendJson(res, 400, {
@@ -48,7 +24,7 @@ async function handleUpload(req: ApiRequest, res: ApiResponse): Promise<void> {
     return;
   }
 
-  const unsupported = files.find((file) => !isSupportedFile(file.originalFilename || ""));
+  const unsupported = files.find((file) => !isSupportedFile(file.fileName));
 
   if (unsupported) {
     sendJson(res, 415, {
@@ -61,9 +37,9 @@ async function handleUpload(req: ApiRequest, res: ApiResponse): Promise<void> {
   const indexed = [];
 
   for (const file of files) {
-    const document = await createDocumentFromTempFile(
-      file.filepath,
-      file.originalFilename || "untitled.txt",
+    const document = await createDocumentFromBuffer(
+      file.buffer,
+      file.fileName || "untitled.txt",
       file.size,
     );
     const reindexed = await reindexDocument(document.id);
@@ -77,26 +53,26 @@ async function handleUpload(req: ApiRequest, res: ApiResponse): Promise<void> {
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
-  if (!["GET", "POST", "DELETE"].includes(req.method || "")) {
-    sendMethodNotAllowed(res, ["GET", "POST", "DELETE"]);
-    return;
-  }
-
-  if (!requireAdmin(req, res)) {
-    return;
-  }
-
-  const rateLimit = checkRateLimit(req, "admin-files", 30, 60_000);
-
-  if (!rateLimit.ok) {
-    sendJson(res, 429, {
-      error: "rate_limit",
-      message: `Bạn thao tác quá nhanh. Vui lòng thử lại sau ${rateLimit.retryAfterSeconds} giây.`,
-    });
-    return;
-  }
-
   try {
+    if (!["GET", "POST", "DELETE"].includes(req.method || "")) {
+      sendMethodNotAllowed(res, ["GET", "POST", "DELETE"]);
+      return;
+    }
+
+    if (!requireAdmin(req, res)) {
+      return;
+    }
+
+    const rateLimit = checkRateLimit(req, "admin-files", 30, 60_000);
+
+    if (!rateLimit.ok) {
+      sendJson(res, 429, {
+        error: "rate_limit",
+        message: `Bạn thao tác quá nhanh. Vui lòng thử lại sau ${rateLimit.retryAfterSeconds} giây.`,
+      });
+      return;
+    }
+
     const url = getRequestUrl(req);
 
     if (req.method === "GET") {
@@ -151,12 +127,21 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
 
     await handleUpload(req, res);
   } catch (error) {
-    sendJson(res, 500, {
-      error: "admin_file_error",
-      message:
-        error instanceof Error
-          ? error.message
-          : "Không thể xử lý file. Vui lòng thử lại.",
+    const message =
+      error instanceof Error ? error.message : "Không thể xử lý file. Vui lòng thử lại.";
+    const isTooLarge = message.toLowerCase().includes("too large");
+
+    console.error("[api/admin/files] request failed", {
+      method: req.method,
+      message,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    sendJson(res, isTooLarge ? 413 : 500, {
+      error: isTooLarge ? "file_too_large" : "admin_file_error",
+      message: isTooLarge
+        ? "File quá lớn. Vercel Functions chỉ nhận payload tối đa 4.5 MB; hãy upload file dưới 4 MB."
+        : message,
     });
   }
 }

@@ -9,6 +9,8 @@ import {
 } from "../lib/api";
 import type { PublicDocument } from "../lib/types";
 
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) {
     return `${bytes} B`;
@@ -80,6 +82,15 @@ export function AdminPanel({ email, onLogout }: AdminPanelProps) {
     setMessage("");
 
     try {
+      const oversizedFile = Array.from(selectedFiles).find((file) => file.size > MAX_UPLOAD_BYTES);
+
+      if (oversizedFile) {
+        setMessage(
+          `${oversizedFile.name} lớn hơn 4 MB. Vercel Hobby chỉ nhận payload nhỏ hơn 4.5 MB.`,
+        );
+        return;
+      }
+
       await uploadAdminFiles(selectedFiles);
       await refreshFiles();
       setMessage("Đã upload và index file.");

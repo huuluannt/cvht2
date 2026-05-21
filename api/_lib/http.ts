@@ -116,6 +116,42 @@ export async function readJsonBody<T>(
   return JSON.parse(Buffer.concat(chunks).toString("utf8")) as T;
 }
 
+export async function readRawBody(req: ApiRequest, maxBytes: number): Promise<Buffer> {
+  if (Buffer.isBuffer(req.body)) {
+    if (req.body.length > maxBytes) {
+      throw new Error("Request body is too large.");
+    }
+
+    return req.body;
+  }
+
+  if (typeof req.body === "string") {
+    const body = Buffer.from(req.body);
+
+    if (body.length > maxBytes) {
+      throw new Error("Request body is too large.");
+    }
+
+    return body;
+  }
+
+  const chunks: Buffer[] = [];
+  let size = 0;
+
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+
+    if (size > maxBytes) {
+      throw new Error("Request body is too large.");
+    }
+
+    chunks.push(buffer);
+  }
+
+  return Buffer.concat(chunks);
+}
+
 export function getClientIp(req: ApiRequest): string {
   const forwardedFor = req.headers["x-forwarded-for"];
   const firstForwardedIp = Array.isArray(forwardedFor)

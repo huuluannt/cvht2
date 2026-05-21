@@ -5,6 +5,7 @@ import { requireAdmin } from "../_lib/auth.js";
 import {
   createDocumentFromBuffer,
   deleteDocument,
+  isStorageConfigError,
   listDocuments,
   reindexDocument,
   toPublicDocument,
@@ -137,11 +138,29 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       stack: error instanceof Error ? error.stack : undefined,
     });
 
-    sendJson(res, isTooLarge ? 413 : 500, {
-      error: isTooLarge ? "file_too_large" : "admin_file_error",
-      message: isTooLarge
-        ? "File quá lớn. Vercel Functions chỉ nhận payload tối đa 4.5 MB; hãy upload file dưới 4 MB."
-        : message,
+    const storageNotConfigured = isStorageConfigError(error);
+
+    if (isTooLarge) {
+      sendJson(res, 413, {
+        error: "file_too_large",
+        message:
+          "File quá lớn. Vercel Functions chỉ nhận payload tối đa 4.5 MB; hãy upload file dưới 4 MB.",
+      });
+      return;
+    }
+
+    if (storageNotConfigured) {
+      sendJson(res, 503, {
+        error: "storage_not_configured",
+        message:
+          "Chưa cấu hình kho dữ liệu tài liệu dùng chung cho production. Hãy thêm UPSTASH_REDIS_REST_URL và UPSTASH_REDIS_REST_TOKEN trong Vercel, redeploy, rồi upload lại file.",
+      });
+      return;
+    }
+
+    sendJson(res, 500, {
+      error: "admin_file_error",
+      message,
     });
   }
 }

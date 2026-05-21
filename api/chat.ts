@@ -9,7 +9,7 @@ import { readSession } from "./_lib/auth.js";
 import { checkRateLimit, readJsonBody, sendJson, sendMethodNotAllowed } from "./_lib/http.js";
 import { answerWithProvider, ProviderError } from "./_lib/providers.js";
 import { retrieveRelevantChunks } from "./_lib/retrieval.js";
-import { getAllChunks } from "./_lib/store.js";
+import { getAllChunks, isStorageConfigError } from "./_lib/store.js";
 import type { ApiRequest, ApiResponse, Provider } from "./_lib/types.js";
 
 type ChatBody = {
@@ -120,6 +120,15 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       sendJson(res, errorStatus(error), {
         error: error.kind,
         message: error.message,
+      });
+      return;
+    }
+
+    if (isStorageConfigError(error)) {
+      sendJson(res, 503, {
+        error: "storage_not_configured",
+        message:
+          "Chưa cấu hình kho dữ liệu tài liệu dùng chung cho production. Hãy thêm UPSTASH_REDIS_REST_URL và UPSTASH_REDIS_REST_TOKEN trong Vercel, redeploy, rồi upload lại file.",
       });
       return;
     }

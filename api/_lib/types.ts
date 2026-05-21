@@ -19,7 +19,7 @@ export type DocumentMeta = {
   file_size: number;
   status: DocumentStatus;
   chunk_count: number;
-  stored_path: string;
+  stored_path?: string;
   error_message?: string;
 };
 
@@ -41,4 +41,3 @@ export type StoreShape = {
   documents: DocumentMeta[];
   chunks: RagChunk[];
 };
-

@@ -37,25 +37,29 @@ function createSignedToken(payload: unknown): string {
 }
 
 function verifySignedToken<T>(token: string): T | undefined {
-  const [body, signature] = token.split(".");
+  try {
+    const [body, signature] = token.split(".");
 
-  if (!body || !signature) {
+    if (!body || !signature) {
+      return undefined;
+    }
+
+    const expected = signValue(body);
+    const actualBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expected);
+
+    if (
+      actualBuffer.length !== expectedBuffer.length ||
+      !timingSafeEqual(actualBuffer, expectedBuffer)
+    ) {
+      return undefined;
+    }
+
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as T;
+    return payload;
+  } catch {
     return undefined;
   }
-
-  const expected = signValue(body);
-  const actualBuffer = Buffer.from(signature);
-  const expectedBuffer = Buffer.from(expected);
-
-  if (
-    actualBuffer.length !== expectedBuffer.length ||
-    !timingSafeEqual(actualBuffer, expectedBuffer)
-  ) {
-    return undefined;
-  }
-
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as T;
-  return payload;
 }
 
 export function createSessionCookie(email: string, isAdmin: boolean): string {

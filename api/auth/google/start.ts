@@ -1,4 +1,5 @@
 import {
+  authErrorRedirect,
   buildGoogleAuthUrl,
   createOAuthStateCookie,
   OAUTH_STATE_COOKIE,
@@ -34,12 +35,9 @@ export default function handler(req: ApiRequest, res: ApiResponse): void {
     redirect(res, buildGoogleAuthUrl(state));
   } catch (error) {
     res.setHeader("set-cookie", clearCookie(OAUTH_STATE_COOKIE));
-    sendJson(res, 500, {
-      error: "oauth_not_configured",
-      message:
-        error instanceof Error
-          ? error.message
-          : "Google OAuth chưa được cấu hình.",
-    });
+    redirect(
+      res,
+      authErrorRedirect(error instanceof Error ? "oauth_not_configured" : "google_oauth_failed"),
+    );
   }
 }

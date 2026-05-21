@@ -28,6 +28,10 @@ function authMessageFromUrl(): string {
     return "Đăng nhập Google thất bại. Kiểm tra cấu hình OAuth.";
   }
 
+  if (reason === "oauth_not_configured") {
+    return "Google OAuth chưa được cấu hình đủ. Kiểm tra GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI và SESSION_SECRET trên Vercel.";
+  }
+
   return "";
 }
 
@@ -139,4 +143,3 @@ function App() {
 }
 
 export default App;
-

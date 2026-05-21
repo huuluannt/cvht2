@@ -7,6 +7,7 @@ import {
 import {
   checkRateLimit,
   clearCookie,
+  getRequestUrl,
   redirect,
   sendJson,
   sendMethodNotAllowed,
@@ -30,7 +31,9 @@ export default function handler(req: ApiRequest, res: ApiResponse): void {
   }
 
   try {
-    const { state, cookie } = createOAuthStateCookie();
+    const url = getRequestUrl(req);
+    const popup = url.searchParams.get("popup") === "1";
+    const { state, cookie } = createOAuthStateCookie({ popup });
     res.setHeader("set-cookie", cookie);
     redirect(res, buildGoogleAuthUrl(state));
   } catch (error) {

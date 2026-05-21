@@ -38,7 +38,9 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 export async function getAuthState(): Promise<AuthState> {
-  const data = await parseResponse<Partial<AuthState>>(await fetch("/api/auth/me"));
+  const data = await parseResponse<Partial<AuthState>>(
+    await fetch("/api/auth/me", { credentials: "include" }),
+  );
   return {
     email: data.email || null,
     isAdmin: Boolean(data.isAdmin),
@@ -46,7 +48,9 @@ export async function getAuthState(): Promise<AuthState> {
 }
 
 export async function logoutAdmin(): Promise<void> {
-  await parseResponse(await fetch("/api/auth/logout", { method: "POST" }));
+  await parseResponse(
+    await fetch("/api/auth/logout", { credentials: "include", method: "POST" }),
+  );
 }
 
 export async function askCvht(
@@ -56,6 +60,7 @@ export async function askCvht(
 ): Promise<string> {
   const data = await parseResponse<ChatResponse>(
     await fetch("/api/chat", {
+      credentials: "include",
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -70,7 +75,9 @@ export async function askCvht(
 }
 
 export async function listAdminFiles(): Promise<PublicDocument[]> {
-  const data = await parseResponse<FilesResponse>(await fetch("/api/admin/files"));
+  const data = await parseResponse<FilesResponse>(
+    await fetch("/api/admin/files", { credentials: "include" }),
+  );
   return data.files;
 }
 
@@ -81,6 +88,7 @@ export async function uploadAdminFiles(files: FileList): Promise<PublicDocument[
 
   const data = await parseResponse<FilesResponse>(
     await fetch("/api/admin/files", {
+      credentials: "include",
       method: "POST",
       body: form,
     }),
@@ -92,6 +100,7 @@ export async function uploadAdminFiles(files: FileList): Promise<PublicDocument[
 export async function deleteAdminFile(id: string): Promise<void> {
   await parseResponse(
     await fetch(`/api/admin/files?id=${encodeURIComponent(id)}`, {
+      credentials: "include",
       method: "DELETE",
     }),
   );
@@ -100,6 +109,7 @@ export async function deleteAdminFile(id: string): Promise<void> {
 export async function reindexAdminFile(id: string): Promise<PublicDocument> {
   const data = await parseResponse<FileResponse>(
     await fetch(`/api/admin/files?id=${encodeURIComponent(id)}&action=reindex`, {
+      credentials: "include",
       method: "POST",
     }),
   );

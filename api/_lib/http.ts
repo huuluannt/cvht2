@@ -15,6 +15,13 @@ const globalRateState = globalThis as typeof globalThis & {
 const rateLimitStore = globalRateState.__cvhtRateLimit ?? new Map<string, RateEntry>();
 globalRateState.__cvhtRateLimit = rateLimitStore;
 
+function shouldUseSecureCookies(): boolean {
+  return (
+    process.env.NODE_ENV === "production" ||
+    (Boolean(process.env.VERCEL) && process.env.VERCEL_ENV !== "development")
+  );
+}
+
 export function sendJson(res: ApiResponse, statusCode: number, payload: JsonValue): void {
   res.statusCode = statusCode;
   res.setHeader("content-type", "application/json; charset=utf-8");
@@ -64,21 +71,25 @@ export function createCookie(
     secure?: boolean;
   } = {},
 ): string {
+  const secureCookie = shouldUseSecureCookies();
+
   return serialize(name, value, {
     httpOnly: true,
     path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: secureCookie ? "none" : "lax",
+    secure: secureCookie,
     ...options,
   });
 }
 
 export function clearCookie(name: string): string {
+  const secureCookie = shouldUseSecureCookies();
+
   return serialize(name, "", {
     httpOnly: true,
     path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: secureCookie ? "none" : "lax",
+    secure: secureCookie,
     expires: new Date(0),
   });
 }

@@ -12,6 +12,12 @@ type SessionPayload = {
   exp: number;
 };
 
+type OAuthStatePayload = {
+  nonce: string;
+  exp: number;
+  popup?: boolean;
+};
+
 type GoogleTokenResponse = {
   access_token?: string;
   error?: string;
@@ -104,10 +110,14 @@ export function requireAdmin(req: ApiRequest, res: ApiResponse): SessionPayload 
   return session;
 }
 
-export function createOAuthStateCookie(): { state: string; cookie: string } {
-  const payload = {
+export function createOAuthStateCookie(options: { popup?: boolean } = {}): {
+  state: string;
+  cookie: string;
+} {
+  const payload: OAuthStatePayload = {
     nonce: randomBytes(24).toString("base64url"),
     exp: Date.now() + 10 * 60 * 1000,
+    popup: options.popup,
   };
   const state = createSignedToken(payload);
 
@@ -119,19 +129,35 @@ export function createOAuthStateCookie(): { state: string; cookie: string } {
   };
 }
 
-export function validateOAuthState(req: ApiRequest, state: string | null): boolean {
+export function readOAuthState(
+  req: ApiRequest,
+  state: string | null,
+): OAuthStatePayload | undefined {
   if (!state) {
-    return false;
+    return undefined;
   }
 
   const cookieState = getCookies(req)[OAUTH_STATE_COOKIE];
 
   if (!cookieState || cookieState !== state) {
-    return false;
+    return undefined;
   }
 
-  const payload = verifySignedToken<{ exp: number }>(state);
-  return Boolean(payload && payload.exp > Date.now());
+  const payload = verifySignedToken<OAuthStatePayload>(state);
+  return payload && payload.exp > Date.now() ? payload : undefined;
+}
+
+export function readSignedOAuthState(state: string | null): OAuthStatePayload | undefined {
+  if (!state) {
+    return undefined;
+  }
+
+  const payload = verifySignedToken<OAuthStatePayload>(state);
+  return payload && payload.exp > Date.now() ? payload : undefined;
+}
+
+export function validateOAuthState(req: ApiRequest, state: string | null): boolean {
+  return Boolean(readOAuthState(req, state));
 }
 
 export function buildGoogleAuthUrl(state: string): string {

@@ -106,6 +106,21 @@ http://localhost:3000/api/auth/google/callback
 6. Put the client id and secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
 7. Set `ADMIN_EMAILS` to comma-separated allowed admin emails.
 
+## Iframe Embedding
+
+CVHT2 opens Google admin login in a popup instead of navigating inside the iframe. Google blocks OAuth pages inside iframes, so embedded pages must use the popup flow.
+
+If the parent page uses an iframe `sandbox` attribute, include popup permissions:
+
+```html
+<iframe
+  src="https://cvht.vercel.app"
+  sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+></iframe>
+```
+
+Production auth cookies are set with `SameSite=None; Secure` so the admin session can be sent while CVHT2 is embedded on another domain.
+
 ## Admin Login Troubleshooting
 
 If `/api/auth/google/start` or `/api/auth/google/callback` shows a Vercel `FUNCTION_INVOCATION_FAILED` page, check these production environment variables first:

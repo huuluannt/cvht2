@@ -8,14 +8,19 @@ import type { AuthState, Provider } from "./lib/types";
 
 const API_KEY_STORAGE_KEY = "cvht2_api_key";
 const PROVIDER_STORAGE_KEY = "cvht2_provider";
+const AUTH_POPUP_URL = "/api/auth/google/start?popup=1";
+
+type AuthPopupMessage = {
+  type?: string;
+  ok?: boolean;
+  reason?: string;
+};
 
 function readStoredProvider(): Provider {
   return localStorage.getItem(PROVIDER_STORAGE_KEY) === "groq" ? "groq" : "gemini";
 }
 
-function authMessageFromUrl(): string {
-  const reason = new URLSearchParams(window.location.search).get("auth");
-
+function authMessageFromReason(reason: string | null | undefined): string {
   if (reason === "admin_not_allowed") {
     return "Email Google này không nằm trong ADMIN_EMAILS.";
   }
@@ -35,6 +40,20 @@ function authMessageFromUrl(): string {
   return "";
 }
 
+function authMessageFromUrl(): string {
+  const reason = new URLSearchParams(window.location.search).get("auth");
+  return authMessageFromReason(reason);
+}
+
+function isAuthPopupMessage(value: unknown): value is AuthPopupMessage {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      "type" in value &&
+      (value as AuthPopupMessage).type === "cvht2:auth",
+  );
+}
+
 function App() {
   const [auth, setAuth] = useState<AuthState>({ email: null, isAdmin: false });
   const [apiKey, setApiKey] = useState(() => localStorage.getItem(API_KEY_STORAGE_KEY) || "");
@@ -49,6 +68,27 @@ function App() {
     getAuthState()
       .then(setAuth)
       .catch(() => setAuth({ email: null, isAdmin: false }));
+  }, []);
+
+  useEffect(() => {
+    function handleAuthMessage(event: MessageEvent<unknown>) {
+      if (event.origin !== window.location.origin || !isAuthPopupMessage(event.data)) {
+        return;
+      }
+
+      if (event.data.ok) {
+        setAuthNotice("");
+        void getAuthState()
+          .then(setAuth)
+          .catch(() => setAuth({ email: null, isAdmin: false }));
+        return;
+      }
+
+      setAuthNotice(authMessageFromReason(event.data.reason || "google_oauth_failed"));
+    }
+
+    window.addEventListener("message", handleAuthMessage);
+    return () => window.removeEventListener("message", handleAuthMessage);
   }, []);
 
   function saveApiKey(nextKey: string) {
@@ -69,6 +109,43 @@ function App() {
   async function handleLogout() {
     await logoutAdmin();
     setAuth({ email: null, isAdmin: false });
+  }
+
+  function handleAdminLogin() {
+    setAuthNotice("Đang mở cửa sổ đăng nhập Google...");
+
+    const popup = window.open(
+      AUTH_POPUP_URL,
+      "cvht2_admin_login",
+      "popup=yes,width=520,height=720,left=120,top=80",
+    );
+
+    if (!popup) {
+      setAuthNotice("Trình duyệt đã chặn popup. Hãy cho phép popup cho CVHT2 rồi thử lại.");
+      return;
+    }
+
+    popup.focus();
+
+    const checkClosed = window.setInterval(() => {
+      if (!popup.closed) {
+        return;
+      }
+
+      window.clearInterval(checkClosed);
+      void getAuthState()
+        .then((nextAuth) => {
+          setAuth(nextAuth);
+          setAuthNotice(
+            nextAuth.isAdmin ? "" : "Cửa sổ đăng nhập đã đóng trước khi hoàn tất.",
+          );
+        })
+        .catch(() => {
+          setAuthNotice("Không kiểm tra được trạng thái đăng nhập. Vui lòng thử lại.");
+        });
+    }, 600);
+
+    window.setTimeout(() => window.clearInterval(checkClosed), 5 * 60 * 1000);
   }
 
   const chat = (
@@ -99,9 +176,9 @@ function App() {
                 <span>Academic advisor chatbot</span>
               </div>
             </div>
-            <a className="admin-link" href="/api/auth/google/start">
+            <button className="admin-link" type="button" onClick={handleAdminLogin}>
               Admin login
-            </a>
+            </button>
           </header>
 
           {authNotice && (

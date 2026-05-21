@@ -1,6 +1,4 @@
 import { extname } from "node:path";
-import mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
 
 const SUPPORTED_EXTENSIONS = new Set([".txt", ".md", ".pdf", ".docx"]);
 
@@ -31,9 +29,11 @@ export async function extractTextFromFile(buffer: Buffer, fileName: string): Pro
   if (extension === ".txt" || extension === ".md") {
     text = buffer.toString("utf8");
   } else if (extension === ".docx") {
+    const { default: mammoth } = await import("mammoth");
     const result = await mammoth.extractRawText({ buffer });
     text = result.value;
   } else if (extension === ".pdf") {
+    const { PDFParse } = await import("pdf-parse");
     const parser = new PDFParse({ data: new Uint8Array(buffer) });
     try {
       const result = await parser.getText();

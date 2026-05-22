@@ -1,7 +1,8 @@
-import { FileText, RefreshCw, Trash2, Upload, X } from "lucide-react";
+import { FilePlus2, FileText, RefreshCw, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import {
+  createAdminContent,
   deleteAdminFile,
   listAdminFiles,
   reindexAdminFile,
@@ -10,6 +11,8 @@ import {
 import type { PublicDocument } from "../lib/types";
 
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+const MAX_DIRECT_CONTENT_BYTES = 128 * 1024;
+const MAX_DIRECT_CONTENT_CHARS = 100_000;
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) {
@@ -43,6 +46,8 @@ type AdminPanelProps = {
 
 export function AdminPanel({ email, onCloseMobile, onLogout }: AdminPanelProps) {
   const [files, setFiles] = useState<PublicDocument[]>([]);
+  const [contentTitle, setContentTitle] = useState("");
+  const [directContent, setDirectContent] = useState("");
   const [isBusy, setIsBusy] = useState(false);
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -98,6 +103,46 @@ export function AdminPanel({ email, onCloseMobile, onLogout }: AdminPanelProps) 
       event.target.value = "";
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Upload thất bại.");
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function handleContentSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const trimmedContent = directContent.trim();
+
+    if (!trimmedContent) {
+      setMessage("Vui lòng nhập nội dung trước khi lưu.");
+      return;
+    }
+
+    if (trimmedContent.length > MAX_DIRECT_CONTENT_CHARS) {
+      setMessage("Nội dung nhập trực tiếp quá dài. Vui lòng rút gọn dưới 100.000 ký tự.");
+      return;
+    }
+
+    if (new Blob([trimmedContent]).size > MAX_DIRECT_CONTENT_BYTES) {
+      setMessage(
+        `Nội dung nhập trực tiếp quá dài. Vui lòng giữ dưới ${formatBytes(
+          MAX_DIRECT_CONTENT_BYTES,
+        )}.`,
+      );
+      return;
+    }
+
+    setIsBusy(true);
+    setMessage("");
+
+    try {
+      await createAdminContent(contentTitle.trim(), trimmedContent);
+      await refreshFiles();
+      setContentTitle("");
+      setDirectContent("");
+      setMessage("Đã lưu và index nội dung nhập trực tiếp.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Không thể lưu nội dung.");
     } finally {
       setIsBusy(false);
     }
@@ -182,13 +227,52 @@ export function AdminPanel({ email, onCloseMobile, onLogout }: AdminPanelProps) 
           </button>
         </section>
 
+        <form className="upload-box direct-content-box" onSubmit={handleContentSubmit}>
+          <div>
+            <h3>Nội dung nhập trực tiếp</h3>
+            <p>Lưu đoạn text này vào dữ liệu để CVHT dùng khi trả lời.</p>
+          </div>
+
+          <label className="field-label">
+            Tiêu đề
+            <input
+              disabled={isBusy}
+              maxLength={120}
+              placeholder="VD: Quy định đăng ký học phần"
+              type="text"
+              value={contentTitle}
+              onChange={(event) => setContentTitle(event.target.value)}
+            />
+          </label>
+
+          <label className="field-label">
+            Content
+            <textarea
+              disabled={isBusy}
+              maxLength={MAX_DIRECT_CONTENT_CHARS}
+              placeholder="Dán hoặc nhập nội dung cần thêm vào dữ liệu CVHT..."
+              value={directContent}
+              onChange={(event) => setDirectContent(event.target.value)}
+            />
+          </label>
+
+          <button
+            className="primary-button"
+            disabled={isBusy || directContent.trim().length === 0}
+            type="submit"
+          >
+            <FilePlus2 size={16} />
+            Lưu content
+          </button>
+        </form>
+
         {message && <div className="admin-message">{message}</div>}
 
-        <section className="file-list" aria-label="Uploaded files">
+        <section className="file-list" aria-label="Knowledge sources">
           {files.length === 0 ? (
             <div className="empty-files">
               <FileText size={24} />
-              Chưa có tài liệu nào.
+              Chưa có dữ liệu nào.
             </div>
           ) : (
             files.map((file) => (

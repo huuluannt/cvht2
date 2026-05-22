@@ -174,6 +174,29 @@ export async function createDocumentFromBuffer(
   return document;
 }
 
+function ensureTextFileName(originalName: string): string {
+  const trimmedName = originalName.trim() || "direct-content.txt";
+  const extension = extname(trimmedName).toLowerCase();
+
+  if (extension === ".txt" || extension === ".md") {
+    return trimmedName;
+  }
+
+  return `${trimmedName}.txt`;
+}
+
+export async function createDocumentFromText(
+  text: string,
+  originalName: string,
+): Promise<DocumentMeta> {
+  const buffer = Buffer.from(text, "utf8");
+  return await createDocumentFromBuffer(
+    buffer,
+    ensureTextFileName(originalName),
+    buffer.byteLength,
+  );
+}
+
 async function updateDocument(
   id: string,
   update: (document: DocumentMeta, store: StoreShape) => void,

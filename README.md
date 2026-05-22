@@ -17,6 +17,7 @@ Tôi không tìm thấy thông tin này trong dữ liệu CVHT hiện có.
 - Admin allow-list through `ADMIN_EMAILS`.
 - Admin uses server-side Gemini/Groq API keys from environment variables.
 - Upload, list, delete, and re-index `.txt`, `.md`, `.pdf`, and `.docx` files up to 4 MB per request.
+- Admin can paste direct text content into the panel and index it as CVHT knowledge without creating a file first.
 - Server-side text extraction, 500-1000 token chunking with overlap, JSON chunk storage, and keyword retrieval.
 - Per-IP in-memory rate limiting, max question length, max context length, and clear API errors.
 
@@ -182,7 +183,7 @@ Vercel Functions have a 4.5 MB request payload limit, so the app intentionally c
 
 ## RAG Flow
 
-1. Admin uploads supported files.
+1. Admin uploads supported files or saves direct text content from the Admin panel.
 2. Server extracts text with UTF-8, `pdf-parse`, or `mammoth`.
 3. Text is split into overlapping chunks.
 4. Chunks are stored with `document_id`, `file_name`, `chunk_id`, `text`, and `created_at`.

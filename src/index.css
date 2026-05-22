@@ -89,6 +89,7 @@ a {
 }
 
 .brand,
+.chat-primary-row,
 .chat-identity,
 .file-row-main,
 .modal-actions,
@@ -294,6 +295,17 @@ a {
   min-width: 0;
 }
 
+.chat-primary-row {
+  flex: 1 1 auto;
+  gap: 12px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.chat-primary-row .chat-identity {
+  flex: 1 1 auto;
+}
+
 .bot-mark {
   align-items: center;
   background: var(--accent-soft);
@@ -322,6 +334,10 @@ a {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.chat-tools.admin-tools {
+  align-items: flex-end;
 }
 
 .provider-select,
@@ -370,6 +386,7 @@ select {
   gap: 6px;
   min-height: 36px;
   padding: 0 10px;
+  white-space: nowrap;
 }
 
 .message-list {
@@ -525,8 +542,20 @@ select {
   font-size: 13px;
 }
 
-.upload-box input {
+.upload-box > input[type="file"] {
   display: none;
+}
+
+.direct-content-box .primary-button {
+  justify-self: start;
+}
+
+.field-label textarea {
+  line-height: 1.45;
+  min-height: 140px;
+  padding: 10px;
+  resize: vertical;
+  width: 100%;
 }
 
 .admin-message {
@@ -812,6 +841,33 @@ select {
     justify-content: flex-start;
   }
 
+  .chat-primary-row {
+    width: 100%;
+  }
+
+  .chat-tools.admin-tools {
+    align-items: end;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+  }
+
+  .chat-tools.admin-tools .provider-select {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .chat-tools.admin-tools select {
+    width: 100%;
+  }
+
+  .chat-tools.admin-tools .server-key-pill {
+    align-self: end;
+    min-height: 44px;
+  }
+
   .message-bubble {
     max-width: 88%;
   }
@@ -845,6 +901,15 @@ select {
     align-items: stretch;
     display: grid;
     grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .chat-tools.admin-tools {
+    align-items: end;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .chat-tools.admin-tools .provider-select {
     width: 100%;
   }
 

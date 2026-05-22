@@ -1,4 +1,4 @@
-import { Bot, HelpCircle, KeyRound, Loader2, PanelLeftOpen, Send, ShieldCheck } from "lucide-react";
+import { Bot, HelpCircle, KeyRound, Loader2, Send, Shield, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { askCvht } from "../lib/api";
@@ -94,17 +94,17 @@ export function ChatWindow({
   return (
     <section className="chat-shell" aria-label="CVHT Chatbot">
       <header className="chat-header">
-        <div className="chat-identity">
-          <span className="bot-mark" aria-hidden="true">
-            <Bot size={20} />
-          </span>
-          <div>
-            <h1>CVHT Chatbot</h1>
-            <p>Khoa Sinh học - CNSH, Trường ĐH KHTN, ĐHQG-HCM</p>
+        <div className="chat-primary-row">
+          <div className="chat-identity">
+            <span className="bot-mark" aria-hidden="true">
+              <Bot size={20} />
+            </span>
+            <div>
+              <h1>CVHT Chatbot</h1>
+              <p>Khoa Sinh học - CNSH, Trường ĐH KHTN, ĐHQG-HCM</p>
+            </div>
           </div>
-        </div>
 
-        <div className="chat-tools">
           {isAdmin && onOpenAdminPanel && (
             <button
               aria-label="Mở admin"
@@ -113,9 +113,12 @@ export function ChatWindow({
               type="button"
               onClick={onOpenAdminPanel}
             >
-              <PanelLeftOpen size={18} />
+              <Shield size={18} />
             </button>
           )}
+        </div>
+
+        <div className={`chat-tools${isAdmin ? " admin-tools" : ""}`}>
           <label className="provider-select">
             <span>Provider</span>
             <select value={provider} onChange={(event) => onProviderChange(event.target.value as Provider)}>

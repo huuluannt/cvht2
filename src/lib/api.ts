@@ -97,6 +97,22 @@ export async function uploadAdminFiles(files: FileList): Promise<PublicDocument[
   return data.files;
 }
 
+export async function createAdminContent(
+  title: string,
+  content: string,
+): Promise<PublicDocument> {
+  const data = await parseResponse<FileResponse>(
+    await fetch("/api/admin/files", {
+      credentials: "include",
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title, content }),
+    }),
+  );
+
+  return data.file;
+}
+
 export async function deleteAdminFile(id: string): Promise<void> {
   await parseResponse(
     await fetch(`/api/admin/files?id=${encodeURIComponent(id)}`, {

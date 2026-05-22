@@ -1,9 +1,16 @@
 import { isSupportedFile, supportedFileTypesLabel } from "../_lib/extract.js";
-import { checkRateLimit, getRequestUrl, sendJson, sendMethodNotAllowed } from "../_lib/http.js";
+import {
+  checkRateLimit,
+  getRequestUrl,
+  readJsonBody,
+  sendJson,
+  sendMethodNotAllowed,
+} from "../_lib/http.js";
 import { parseMultipartFiles } from "../_lib/multipart.js";
 import { requireAdmin } from "../_lib/auth.js";
 import {
   createDocumentFromBuffer,
+  createDocumentFromText,
   deleteDocument,
   isStorageConfigError,
   listDocuments,
@@ -13,6 +20,27 @@ import {
 import type { ApiRequest, ApiResponse } from "../_lib/types.js";
 
 const MAX_UPLOAD_SIZE = 4 * 1024 * 1024;
+const MAX_DIRECT_CONTENT_BYTES = 128 * 1024;
+
+type DirectContentBody = {
+  title?: unknown;
+  content?: unknown;
+};
+
+function isJsonRequest(req: ApiRequest): boolean {
+  const contentType = req.headers["content-type"];
+  const value = Array.isArray(contentType) ? contentType[0] : contentType;
+  return Boolean(value?.toLowerCase().includes("application/json"));
+}
+
+function directContentTitle(rawTitle: unknown): string {
+  if (typeof rawTitle === "string" && rawTitle.trim()) {
+    return rawTitle.trim().slice(0, 120);
+  }
+
+  const timestamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+  return `Nội dung nhập trực tiếp ${timestamp}`;
+}
 
 async function handleUpload(req: ApiRequest, res: ApiResponse): Promise<void> {
   const files = await parseMultipartFiles(req, MAX_UPLOAD_SIZE);
@@ -51,6 +79,34 @@ async function handleUpload(req: ApiRequest, res: ApiResponse): Promise<void> {
   }
 
   sendJson(res, 201, { files: indexed });
+}
+
+async function handleDirectContent(req: ApiRequest, res: ApiResponse): Promise<void> {
+  const body = await readJsonBody<DirectContentBody>(req, MAX_DIRECT_CONTENT_BYTES + 4096);
+  const content = typeof body?.content === "string" ? body.content.trim() : "";
+
+  if (!content) {
+    sendJson(res, 400, {
+      error: "missing_content",
+      message: "Vui lòng nhập nội dung trước khi lưu.",
+    });
+    return;
+  }
+
+  if (Buffer.byteLength(content, "utf8") > MAX_DIRECT_CONTENT_BYTES) {
+    sendJson(res, 413, {
+      error: "content_too_large",
+      message: "Nội dung nhập trực tiếp quá dài. Vui lòng giữ dưới 128 KB.",
+    });
+    return;
+  }
+
+  const document = await createDocumentFromText(content, directContentTitle(body?.title));
+  const reindexed = await reindexDocument(document.id);
+
+  sendJson(res, 201, {
+    file: toPublicDocument(reindexed || document),
+  });
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
@@ -126,8 +182,14 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       return;
     }
 
+    if (isJsonRequest(req)) {
+      await handleDirectContent(req, res);
+      return;
+    }
+
     await handleUpload(req, res);
   } catch (error) {
+    const isDirectContentRequest = isJsonRequest(req);
     const message =
       error instanceof Error ? error.message : "Không thể xử lý file. Vui lòng thử lại.";
     const isTooLarge = message.toLowerCase().includes("too large");
@@ -142,9 +204,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
 
     if (isTooLarge) {
       sendJson(res, 413, {
-        error: "file_too_large",
-        message:
-          "File quá lớn. Vercel Functions chỉ nhận payload tối đa 4.5 MB; hãy upload file dưới 4 MB.",
+        error: isDirectContentRequest ? "content_too_large" : "file_too_large",
+        message: isDirectContentRequest
+          ? "Nội dung nhập trực tiếp quá dài. Vui lòng giữ dưới 128 KB."
+          : "File quá lớn. Vercel Functions chỉ nhận payload tối đa 4.5 MB; hãy upload file dưới 4 MB.",
       });
       return;
     }

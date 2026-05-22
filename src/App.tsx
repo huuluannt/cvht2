@@ -17,7 +17,7 @@ type AuthPopupMessage = {
 };
 
 function readStoredProvider(): Provider {
-  return localStorage.getItem(PROVIDER_STORAGE_KEY) === "groq" ? "groq" : "gemini";
+  return localStorage.getItem(PROVIDER_STORAGE_KEY) === "gemini" ? "gemini" : "groq";
 }
 
 function authMessageFromReason(reason: string | null | undefined): string {
